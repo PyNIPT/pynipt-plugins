@@ -24,7 +24,7 @@ setup(name='pynipt-plugin-{}'.format(__package_name__),
       url=__url__,
       license='GNLv3',
       packages=find_packages(),
-      install_requires=['pynipt'],
+      install_requires=['pynipt>=0.1.1'],
       classifiers=[
           'Development Status :: 3 - Alpha',
           'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
@@ -34,5 +34,5 @@ setup(name='pynipt-plugin-{}'.format(__package_name__),
           'Programming Language :: Python :: 3.7',
           'Topic :: Software Development',
       ],
-      keywords='pynipt, plugin, pipeline, uncch_camri'
+      keywords='pynipt, plugin, pipeline, uncch_camri, linux, mac'
      )

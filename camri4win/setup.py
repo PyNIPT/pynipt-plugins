@@ -13,9 +13,9 @@ __version__ = '0.0.1a1'
 __author__ = 'SungHo Lee'
 __email__ = 'shlee:@unc.edu'
 __url__ = 'https://github.com/dvm-shlee/bruker'
-__package_name__ = 'uncch_camri'
+__package_name__ = 'camri4win'
 
-setup(name='pynipt-plugin-{}'.format(__package_name__),
+setup(name=f'pynipt-plugin-{__package_name__}',
       version=__version__,
       description='UNCCH fMRI pipeline',
       python_requires='>3.5, <3.8',
@@ -24,15 +24,16 @@ setup(name='pynipt-plugin-{}'.format(__package_name__),
       url=__url__,
       license='GNLv3',
       packages=find_packages(),
-      install_requires=['pynipt'],
+      install_requires=['pynipt>=0.1.1'],
       classifiers=[
           'Development Status :: 3 - Alpha',
           'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
           'Natural Language :: English',
           'Operating System :: POSIX :: Linux',
           'Operating System :: MacOS',
+          'Operating System :: Microsoft :: Windows :: Windows 10',
           'Programming Language :: Python :: 3.7',
           'Topic :: Software Development',
       ],
-      keywords='pynipt, plugin, pipeline, uncch_camri'
+      keywords='pynipt, plugin, pipeline, camri4win, windows10, windows'
      )
