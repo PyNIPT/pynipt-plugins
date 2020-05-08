@@ -29,7 +29,7 @@ class Interface(Processor):
             filter_dict = dict(regex=regex, ext=img_ext)
         else:
             filter_dict = dict(ext=img_ext)
-        itf.set_input(label='input', input_path=input_path, method=0,
+        itf.set_input(label='input', input_path=input_path, group_input=False,
                       idx=file_idx,
                       filter_dict=filter_dict)
         itf.set_output(label='output')
@@ -69,7 +69,7 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='SliceTimingCorrection',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path, method=0,
+        itf.set_input(label='input', input_path=input_path, group_input=False,
                       filter_dict=dict(ext=img_ext))
         itf.set_output(label='output')
         cmd = ['3dTshift -prefix *[output]']
@@ -97,7 +97,7 @@ class Interface(Processor):
                                 in session folder.
             img_ext(str):       file extension (default='nii.gz')
             base(int or str):   reference image
-            fourior(bool):      Fourior option on for 3dvolreg
+            fourier(bool):      Fourior option on for 3dvolreg
             verbose(bool):      if True, print out all processing messages on STERR.log
             mparam(bool):       if True, generate motion parameter file(1D) using same filename
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -110,7 +110,7 @@ class Interface(Processor):
             filter_dict = dict(ext=img_ext)
         itf.init_step(title='MotionCorrection',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path, method=0, idx=file_idx,
+        itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
                       filter_dict=filter_dict)
         itf.set_output(label='output')
 
@@ -136,30 +136,30 @@ class Interface(Processor):
         itf.set_output_checker()
         itf.run()
 
-    def camri_BrainMasking(self, input_path, file_idx=None, img_ext='nii.gz',
-                           step_idx=None, sub_code=None, suffix=None):
-        """ Estimate brain mask using 2D-UNET,
-
-        Args:
-            input_path(str):    datatype or stepcode of input data
-            file_idx(int):      index of file if the process need to be executed on a specific file
-                                in session folder.
-            img_ext(str):       file extension (default='nii.gz')
-            step_idx(int):      stepcode index (positive integer lower than 99)
-            sub_code(str):      sub stepcode, one character, 0 or A-Z
-            suffix(str):        suffix to identify the current step
-        """
-        itf = InterfaceBuilder(self)
-        itf.init_step(title='BrainMaskEstimate', mode='masking',
-                      idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path, method=0, idx=file_idx,
-                      filter_dict=dict(ext=img_ext))
-        itf.set_output(label='mask', suffix='_mask')
-        itf.set_output(label='copy')
-        itf.set_cmd("rbm *[input] *[mask]")
-        itf.set_cmd("cp *[input] *[copy]")
-        itf.set_output_checker(label='mask')
-        itf.run()
+    # def camri_BrainMasking(self, input_path, file_idx=None, img_ext='nii.gz',
+    #                        step_idx=None, sub_code=None, suffix=None):
+    #     """ Estimate brain mask using 2D-UNET,
+    #
+    #     Args:
+    #         input_path(str):    datatype or stepcode of input data
+    #         file_idx(int):      index of file if the process need to be executed on a specific file
+    #                             in session folder.
+    #         img_ext(str):       file extension (default='nii.gz')
+    #         step_idx(int):      stepcode index (positive integer lower than 99)
+    #         sub_code(str):      sub stepcode, one character, 0 or A-Z
+    #         suffix(str):        suffix to identify the current step
+    #     """
+    #     itf = InterfaceBuilder(self)
+    #     itf.init_step(title='BrainMaskEstimate', mode='masking',
+    #                   idx=step_idx, subcode=sub_code, suffix=suffix)
+    #     itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
+    #                   filter_dict=dict(ext=img_ext))
+    #     itf.set_output(label='mask', suffix='_mask')
+    #     itf.set_output(label='copy')
+    #     itf.set_cmd("rbm *[input] *[mask]")
+    #     itf.set_cmd("cp *[input] *[copy]")
+    #     itf.set_output_checker(label='mask')
+    #     itf.run()
 
     def afni_SkullStripping(self, input_path, mask_path, regex=None,
                             file_idx=None, img_ext='nii.gz',
@@ -183,7 +183,7 @@ class Interface(Processor):
                                ext=img_ext)
         else:
             filter_dict = dict(ext=img_ext)
-        itf.set_input(label='input', input_path=input_path, method=0, idx=file_idx,
+        itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
                       filter_dict=filter_dict)
         itf.set_static_input(label='mask', input_path=mask_path,
                              idx=0, mask=True, filter_dict=dict(regex=r'.*_mask$', ext=img_ext))
@@ -209,7 +209,7 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='N4BiasFieldCorrection', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path, method=0, idx=file_idx,
+        itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
                       filter_dict=dict(ext=img_ext))
         itf.set_output(label='output')
         itf.set_cmd("N4BiasFieldCorrection -i *[input] -o *[output]")
@@ -234,7 +234,7 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='Coregistration', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path, method=0, idx=file_idx,
+        itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
                       filter_dict=dict(ext=img_ext))
         itf.set_static_input(label='ref', input_path=ref_path,
                              idx=0, filter_dict=dict(ext=img_ext))
@@ -264,7 +264,7 @@ class Interface(Processor):
         itf = InterfaceBuilder(self, n_threads=1)
         itf.init_step(title='ApplyTransform', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path, method=0, idx=file_idx,
+        itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
                       filter_dict=dict(ext=img_ext))
         itf.set_static_input(label='ref', input_path=ref_path,
                              idx=0, filter_dict=dict(ext=img_ext))
@@ -294,7 +294,7 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='SpatialNorm', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path, method=0, idx=file_idx,
+        itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
                       filter_dict=dict(ext=img_ext))
         itf.set_var(label='ref', value=ref_path)
         itf.set_output(label='output')
@@ -324,7 +324,7 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='ApplySpatialNorm', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path, method=0,
+        itf.set_input(label='input', input_path=input_path, group_input=False,
                       idx=file_idx, filter_dict=dict(ext=img_ext))
         itf.set_static_input(label='base', input_path=ref_path,
                              idx=0, filter_dict=dict(ext='nii.gz'))
@@ -355,7 +355,7 @@ class Interface(Processor):
         itf = InterfaceBuilder(self, n_threads=1)
         itf.init_step(title='SpatialNorm', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path, method=0, idx=file_idx,
+        itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
                       filter_dict=dict(ext=img_ext))
         itf.set_var(label='ref', value=ref_path)
         itf.set_var(label='thread', value=self._n_threads)
@@ -382,7 +382,7 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='ApplySpatialNorm', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path, method=0,
+        itf.set_input(label='input', input_path=input_path, group_input=False,
                       idx=file_idx, filter_dict=dict(ext=img_ext))
         itf.set_static_input(label='base', input_path=ref_path,
                              idx=0, filter_dict=dict(regex=r'.*_Warped$', ext='nii.gz'))
@@ -415,7 +415,7 @@ class Interface(Processor):
         itf.init_step(title='BlurInMask', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
         itf.set_input(label='input', input_path=input_path, idx=file_idx,
-                      filter_dict=dict(ext=img_ext), method=0)
+                      filter_dict=dict(ext=img_ext), group_input=False)
         itf.set_var(label='fwhm', value=str(fwhm))
         itf.set_var(label='mask', value=mask_path)
         itf.set_output(label='output')
@@ -441,11 +441,10 @@ class Interface(Processor):
         itf.init_step(title='BlurToFWHM', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
         itf.set_input(label='input', input_path=input_path, idx=file_idx,
-                      filter_dict=dict(ext=img_ext), method=0)
+                      filter_dict=dict(ext=img_ext), group_input=False)
         itf.set_var(label='fwhm', value=str(fwhm))
         itf.set_output(label='output')
         itf.set_cmd("3dmerge -prefix *[output] -doall -1blur_fwhm *[fwhm] *[input]")
-        itf.set_errterm(['ERROR'])
         itf.set_output_checker(label='output')
         itf.run()
 
@@ -468,7 +467,7 @@ class Interface(Processor):
         itf.init_step(title='Scaling', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
         itf.set_input(label='input', input_path=input_path,
-                      filter_dict=dict(ext=img_ext), method=0)
+                      filter_dict=dict(ext=img_ext), group_input=False)
         itf.set_temporary(label='meanimg')
         itf.set_var(label='mask', value=mask_path)
         itf.set_var(label='mean', value=mean)
@@ -513,7 +512,7 @@ class Interface(Processor):
             filter_dict = dict(ext=img_ext)
         # set input
         itf.set_input(label='input', input_path=input_path,
-                      filter_dict=filter_dict, method=0)
+                      filter_dict=filter_dict, group_input=False)
         # set variables
         itf.set_var(label='mask', value=mask_path)
         itf.set_var(label='polort', value=polort)
@@ -559,12 +558,12 @@ class Interface(Processor):
         itf.init_step(title=title,
                       idx=step_idx, subcode=sub_code, suffix=suffix,
                       mode='reporting')
-        itf.set_input(label='groupA', input_path=input_a, method=1,
+        itf.set_input(label='groupA', input_path=input_a, group_input=True,
                       join_modifier=dict(suffix="'[{}]'".format(data_idx_a)),
                       filter_dict=dict(regex=regex_a, ext=img_ext))
 
         if input_b is not None:
-            itf.set_input(label='groupB', input_path=input_b, method=1,
+            itf.set_input(label='groupB', input_path=input_b, group_input=True,
                           join_modifier=dict(suffix=f"'[{data_idx_b}]'"),
                           filter_dict=dict(regex=regex_b, ext=img_ext))
             input_sets = '-setA *[groupA] -setB *[groupB]'
@@ -624,7 +623,7 @@ class Interface(Processor):
                       idx=step_idx, subcode=sub_code, suffix=suffix, mode='reporting')
         itf.set_input(label='input', input_path=input_path,
                       filter_dict=dict(regex=regex, ext=img_ext),
-                      method=1)
+                      group_input=True)
 
         # Prepare data table (advanced usage of complex input structure)
         p = re.compile(regex)

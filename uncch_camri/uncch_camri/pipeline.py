@@ -41,7 +41,7 @@ class UNCCH_CAMRI(PipelineBuilder):
                                 register with regular contrasted image. by providing this option to choose
                                 file's regex pattern of MION infusion data, it will creates average image using
                                 first 20 frames and last 20 frames to generate BOLD and CBV average images.
-            cbv_scantime(int):  total scantime for mion infusion image with second.
+            cbv_scantime(int):  total scantime for MION infusion image in second.
             - 02_CorePreprocessing
             template_path(str): absolute path of brain template image (default=None)
             aniso(bool):        True if voxel is anisotropic (default=False)
@@ -136,7 +136,6 @@ class UNCCH_CAMRI(PipelineBuilder):
         if self.anat is not None:
             self.interface.camri_BrainMasking(input_path=self.anat, file_idx=0,
                                               step_idx=1, sub_code='C', suffix=self.anat)
-
 
     def pipe_02_CorePreprocessing(self):
         """

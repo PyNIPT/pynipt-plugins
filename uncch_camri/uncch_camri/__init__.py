@@ -1,4 +1,4 @@
-from .interface import Interface
-from .pipeline import UNCCH_CAMRI
+from .interface import *
+from .pipeline import *
 
 __all__ = ['interface', 'pipeline']

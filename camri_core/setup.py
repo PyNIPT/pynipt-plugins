@@ -13,7 +13,7 @@ __version__ = '0.0.1a1'
 __author__ = 'SungHo Lee'
 __email__ = 'shlee:@unc.edu'
 __url__ = 'https://github.com/dvm-shlee/bruker'
-__package_name__ = 'camri4win'
+__package_name__ = 'camri_core'
 
 setup(name=f'pynipt-plugin-{__package_name__}',
       version=__version__,
@@ -24,7 +24,9 @@ setup(name=f'pynipt-plugin-{__package_name__}',
       url=__url__,
       license='GNLv3',
       packages=find_packages(),
-      install_requires=['pynipt>=0.1.1'],
+      install_requires=['pynipt>=0.1.1b0',
+                        'nibabel',
+                        'simpleITK'],
       classifiers=[
           'Development Status :: 3 - Alpha',
           'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
@@ -35,5 +37,5 @@ setup(name=f'pynipt-plugin-{__package_name__}',
           'Programming Language :: Python :: 3.7',
           'Topic :: Software Development',
       ],
-      keywords='pynipt, plugin, pipeline, camri4win, windows10, windows'
+      keywords='pynipt, plugin, pipeline, camri_core, windows10, windows'
      )
