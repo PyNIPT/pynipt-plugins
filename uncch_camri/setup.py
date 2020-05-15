@@ -12,7 +12,7 @@ from setuptools import find_packages
 __version__ = '0.0.1a1'
 __author__ = 'SungHo Lee'
 __email__ = 'shlee:@unc.edu'
-__url__ = 'https://github.com/dvm-shlee/bruker'
+__url__ = 'https://github.com/dvm-shlee/uncch_camri'
 __package_name__ = 'uncch_camri'
 
 setup(name='pynipt-plugin-{}'.format(__package_name__),
