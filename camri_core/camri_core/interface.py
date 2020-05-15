@@ -67,7 +67,7 @@ class Interface(Processor):
         itf.set_output_checker(label='mask')
         itf.run()
 
-    def camri_NuisanceRegression(self, input_path, mask_path=None,
+    def camri_NuisanceRegression(self, input_path, dt, mask_path=None,
                                  regex=None, img_ext='nii.gz',
                                  fwhm=None, bandcut=None,
                                  ort=None, ort_regex=None, ort_ext=None,
@@ -75,6 +75,7 @@ class Interface(Processor):
         """
         Args:
             input_path:
+            dt:
             mask_path:
             regex:
             img_ext:
@@ -108,6 +109,9 @@ class Interface(Processor):
                 raise InvalidApproach('Extension hint of ort must be provided.')
             itf.set_static_input(label='ort', input_path=ort, idx=0,
                                  filter_dict=dict(regex=ort_regex, ext=ort_ext))
+        itf.set_var(label='dt', value=dt)
+        itf.set_var(label='bp_order', value=5)
+        itf.set_var(label='pn_order', value=3)
         itf.set_func(nuisance_filtering_func)
         itf.set_output(label='output')
         itf.set_output_checker(label='output')

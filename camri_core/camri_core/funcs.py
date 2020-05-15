@@ -148,7 +148,7 @@ def nuisance_filtering_func(input: str, output: str, mask: Optional[str] = None,
         else:
             mask_img = None
         stdout.write('  Processing...')
-        filtered_img = apply_funcobj(funcobjs, func_img, mask_img)
+        filtered_img = apply_funcobj(funcobjs, func_img, mask_img, io_handler=stdout)
         filtered_nii = nib.Nifti1Image(filtered_img, img.affine)
         filtered_nii._header = img.header.copy()
 
@@ -158,9 +158,10 @@ def nuisance_filtering_func(input: str, output: str, mask: Optional[str] = None,
             sitk_img, header = nib2sitk(filtered_nii)
             filtered_sitk_img = gaussian_smoothing(sitk_img, fwhm, io_handler=stdout)
             filtered_nii = sitk2nib(filtered_sitk_img, header)
-    except Exception as e:
+    except:
         stderr.write('[ERROR] Failed.\n')
-        stderr.write(str(e))
+        import traceback
+        traceback.print_exception(*sys.exc_info(), file=stderr)
         return 1
     filtered_nii.to_filename(output)
     stdout.write('Done...')
@@ -170,5 +171,5 @@ def nuisance_filtering_func(input: str, output: str, mask: Optional[str] = None,
 if __name__ == '__main__':
     file_path = '../../../slfmri/examples/camri_isotropic_epi.nii.gz'
     nf_output = '../../../slfmri/examples/nuisance_filtered.nii.gz'
-    nuisance_filtering_func(file_path, nf_output, fwhm=0.5, bandcut=[0.01, 0.15])
+    nuisance_filtering_func(file_path, nf_output, fwhm=0.5, bandcut=0.01)
 
