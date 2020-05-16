@@ -53,15 +53,16 @@ def modenorm_func(input: str, output: str, mask: Optional[str] = None,
 
         stdout.write(f'  Target mode value: {mode}\n')
         normed_img = modenorm(func_img, mask_img, mode)
-    except Exception as e:
+    except:
+        import traceback
         stderr.write('[ERROR] Failed.\n')
-        stderr.write(str(e))
+        traceback.print_exception(*sys.exc_info(), file=stderr)
         return 1
 
     normed_nii = nib.Nifti1Image(normed_img, img.affine)
     normed_nii._header = img.header.copy()
     normed_nii.to_filename(output)
-    stdout.write('Done...'.format(output))
+    stdout.write('Done...\n'.format(output))
     return 0
 
 
@@ -147,7 +148,7 @@ def nuisance_filtering_func(input: str, output: str, mask: Optional[str] = None,
             mask_img = np.asarray(nib.load(mask).dataobj)
         else:
             mask_img = None
-        stdout.write('  Processing...')
+        stdout.write('  Processing...\n')
         filtered_img = apply_funcobj(funcobjs, func_img, mask_img, io_handler=stdout)
         filtered_nii = nib.Nifti1Image(filtered_img, img.affine)
         filtered_nii._header = img.header.copy()
@@ -164,7 +165,7 @@ def nuisance_filtering_func(input: str, output: str, mask: Optional[str] = None,
         traceback.print_exception(*sys.exc_info(), file=stderr)
         return 1
     filtered_nii.to_filename(output)
-    stdout.write('Done...')
+    stdout.write('Done...\n')
     return 0
 
 
