@@ -52,7 +52,7 @@ def modenorm_func(input: str, output: str, mask: Optional[str] = None,
             mask_img = None
 
         stdout.write(f'  Target mode value: {mode}\n')
-        normed_img = modenorm(func_img, mask_img, mode)
+        normed_img = modenorm(func_img, mask_img, mode, io_handler=stdout)
     except:
         import traceback
         stderr.write('[ERROR] Failed.\n')
