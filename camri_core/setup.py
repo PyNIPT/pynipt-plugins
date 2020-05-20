@@ -9,7 +9,7 @@ PyNIPT plugin - UNCCH
 from distutils.core import setup
 from setuptools import find_packages
 
-__version__ = '0.0.1a1'
+__version__ = '0.0.1b0'
 __author__ = 'SungHo Lee'
 __email__ = 'shlee:@unc.edu'
 __url__ = 'https://github.com/dvm-shlee/camri_core'
@@ -28,7 +28,7 @@ setup(name=f'pynipt-plugin-{__package_name__}',
                         'nibabel',
                         'simpleITK'],
       classifiers=[
-          'Development Status :: 3 - Alpha',
+          'Development Status :: 4 - Beta',
           'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
           'Natural Language :: English',
           'Operating System :: POSIX :: Linux',

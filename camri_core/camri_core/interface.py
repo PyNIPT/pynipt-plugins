@@ -88,7 +88,7 @@ class Interface(Processor):
             suffix:
         """
         itf = InterfaceBuilder(self)
-        itf.init_step(title='NuisanceRegression', mode='processing',
+        itf.init_step(title='NuisanceRegression', mode='processing', type='python',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
         if regex is not None:
             filter_dict = dict(regex=regex, ext=img_ext)
@@ -115,7 +115,7 @@ class Interface(Processor):
         itf.set_func(nuisance_filtering_func)
         itf.set_output(label='output')
         itf.set_output_checker(label='output')
-        itf.run(mode='python')
+        itf.run()
 
     def camri_ModeNormalization(self, input_path, mask_path=None, mode=1000,
                                 regex=None, img_ext='nii.gz',
@@ -132,7 +132,7 @@ class Interface(Processor):
             suffix(str):        suffix to identify the current step
         """
         itf = InterfaceBuilder(self)
-        itf.init_step(title='ModeNormalization', mode='processing',
+        itf.init_step(title='ModeNormalization', mode='processing', type='python',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
         if regex is not None:
             filter_dict = dict(regex=regex, ext=img_ext)
@@ -145,4 +145,4 @@ class Interface(Processor):
         itf.set_func(modenorm_func)
         itf.set_output(label='output')
         itf.set_output_checker(label='output')
-        itf.run(mode='python')
+        itf.run()
