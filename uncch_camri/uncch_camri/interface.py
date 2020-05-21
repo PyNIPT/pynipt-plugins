@@ -570,9 +570,10 @@ class Interface(Processor):
         else:
             input_sets = '-setA *[groupA]'
         if clustsim is True:
-            option = '-tempdir *[tempdir] -prefix_clustsim *[temp_prefix] -CLUSTSIM'
-            itf.set_var(label='temp_prefix', value='temporary')
-            itf.set_temporary(label='tempdir', path_only=True)
+            option = '-Clustsim'
+            # option = '-tempdir *[tempdir] -prefix_clustsim *[temp_prefix] -CLUSTSIM'
+            # itf.set_var(label='temp_prefix', value='temporary')
+            # itf.set_temporary(label='tempdir', path_only=True)
         else:
             option = ''
         itf.set_output(label='output', modifier=output_filename,
