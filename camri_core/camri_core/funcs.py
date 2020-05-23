@@ -129,7 +129,7 @@ def nuisance_filtering_func(input: str, output: str, mask: Optional[str] = None,
         if bandcut is not None:
             if isinstance(bandcut, list):
                 stdout.write('  Bandpass filter scheduled.\n')
-                stdout.write(f'  - Band Frequencies: {bandcut[0]}-{bandcut[1]}Hz\n')
+                stdout.write(f'  - Band Frequencies: {bandcut}Hz\n')
             else:
                 stdout.write('  Highpass filter scheduled.\n')
                 stdout.write(f'  - Cut Frequency: {bandcut}Hz\n')
