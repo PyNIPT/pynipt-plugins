@@ -1,7 +1,6 @@
 from pynipt import Processor, InterfaceBuilder
-from .funcs import modenorm_func, nuisance_filtering_func
+from .funcs import modenorm_func, nuisance_filtering_func, standardization_func
 from shleeh.errors import *
-from shleeh.utils import debug_tool
 import sys
 
 
@@ -34,6 +33,27 @@ class Interface(Processor):
     #
     # def camri_DVARS(self):
     #     pass
+
+    def camri_Standardize(self, input_path, mask_path, img_ext='nii.gz',
+                          step_idx=None, sub_code=None, suffix=None):
+        """ Standardize data
+
+        Args:
+            input_path(str):    datatype or stepcode of input data
+            img_ext(str):       file extension (default='nii.gz')
+            step_idx(int):      stepcode index (positive integer lower than 99)
+            sub_code(str):      sub stepcode, one character, 0 or A-Z
+            suffix(str):        suffix to identify the current step
+        """
+        itf = InterfaceBuilder(self)
+        itf.init_step(title='StandardizeSignal', mode='processing', type='python',
+                      idx=step_idx, subcode=sub_code, suffix=suffix)
+        itf.set_input(label='input', input_path=input_path)
+        itf.set_var(label='mask', value=mask_path)
+        itf.set_output(label='output')
+        itf.set_func(standardization_func)
+        itf.set_output_checker(label='output')
+        itf.run()
 
     def camri_BrainMasking(self, input_path, file_idx=None, regex=None, img_ext='nii.gz',
                            step_idx=None, sub_code=None, suffix=None):
@@ -68,6 +88,9 @@ class Interface(Processor):
         itf.set_output_checker(label='mask')
         itf.run()
 
+    def nilearn_NuisanceRegression(self):
+        pass
+
     def camri_NuisanceRegression(self, input_path, dt, mask_path=None,
                                  regex=None, img_ext='nii.gz',
                                  fwhm=None, bandcut=None,
@@ -76,8 +99,8 @@ class Interface(Processor):
         """
         Args:
             input_path:
-            dt:
-            mask_path:
+            dt: sample time in second
+            mask_path: mask path
             regex:
             img_ext:
             fwhm:
@@ -108,8 +131,8 @@ class Interface(Processor):
                 raise InvalidApproach('Regex pattern must provided for ort option.')
             if ort_ext is None:
                 raise InvalidApproach('Extension hint of ort must be provided.')
-            itf.set_static_input(label='ort', input_path=ort, idx=0,
-                                 filter_dict=dict(regex=ort_regex, ext=ort_ext))
+            itf.set_input(label='ort', input_path=ort,
+                          filter_dict=dict(regex=ort_regex, ext=ort_ext))
         itf.set_var(label='dt', value=dt)
         itf.set_var(label='bp_order', value=5)
         itf.set_var(label='pn_order', value=3)

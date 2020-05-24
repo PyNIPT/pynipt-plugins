@@ -136,31 +136,6 @@ class Interface(Processor):
         itf.set_output_checker()
         itf.run()
 
-    # def camri_BrainMasking(self, input_path, file_idx=None, img_ext='nii.gz',
-    #                        step_idx=None, sub_code=None, suffix=None):
-    #     """ Estimate brain mask using 2D-UNET,
-    #
-    #     Args:
-    #         input_path(str):    datatype or stepcode of input data
-    #         file_idx(int):      index of file if the process need to be executed on a specific file
-    #                             in session folder.
-    #         img_ext(str):       file extension (default='nii.gz')
-    #         step_idx(int):      stepcode index (positive integer lower than 99)
-    #         sub_code(str):      sub stepcode, one character, 0 or A-Z
-    #         suffix(str):        suffix to identify the current step
-    #     """
-    #     itf = InterfaceBuilder(self)
-    #     itf.init_step(title='BrainMaskEstimate', mode='masking',
-    #                   idx=step_idx, subcode=sub_code, suffix=suffix)
-    #     itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
-    #                   filter_dict=dict(ext=img_ext))
-    #     itf.set_output(label='mask', suffix='_mask')
-    #     itf.set_output(label='copy')
-    #     itf.set_cmd("rbm *[input] *[mask]")
-    #     itf.set_cmd("cp *[input] *[copy]")
-    #     itf.set_output_checker(label='mask')
-    #     itf.run()
-
     def afni_SkullStripping(self, input_path, mask_path, regex=None,
                             file_idx=None, img_ext='nii.gz',
                             step_idx=None, sub_code=None, suffix=None):
