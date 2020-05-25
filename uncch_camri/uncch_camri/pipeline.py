@@ -103,10 +103,9 @@ class UNCCH_CAMRI(PipelineBuilder):
 
     def pipe_01_MaskPreparation(self):
         """
-        The dataset will be first slice timing corrected, and average intensity map of functional image
-        will be calculated on motion corrected data. In the end of this pipeline, empty image file will be
-        generated in the masking path as a place holder of mask with '_mask' suffix.
-        If the anatomical data were inputted, the empty mask files will be generated as well.
+        The dataset will be first slice timing corrected, then it will generate the average intensity map
+        of functional data for mask estimation. In the end of this pipeline, brain mask image file
+        will be generated in the masking path with '_mask' suffix.
         """
         # Series of user defined interface commands to executed for the pipeline
         # -- start -- #
@@ -139,7 +138,7 @@ class UNCCH_CAMRI(PipelineBuilder):
 
     def pipe_02_CorePreprocessing(self):
         """
-        Prior to run this pipeline, template_path argument need to be inputted.
+        Prior to run this pipeline, template_path argument need to be provided.
         All the dataset will be motion corrected, and skull stripping will be applied.
         If the anatomical data are inputted, then functional data will be co-registered into
         anatomical space using affine registration.
@@ -222,7 +221,7 @@ class UNCCH_CAMRI(PipelineBuilder):
     def pipe_03_TaskBased_1stLevelAnalysis(self):
         """
         The normalized data will be scaled to have mean value of 100 for each voxel followed by the spacial smoothing
-        to
+        at given FWHM. Finally, GLM will be performed to get subject level task activity map
         """
         # Series of user defined interface commands to executed for the pipeline
         # -- start -- #
@@ -244,7 +243,10 @@ class UNCCH_CAMRI(PipelineBuilder):
         # --  end  -- #
 
     def pipe_04_TaskBased_2ndLevelAnalysis(self):
-        """"""
+        """
+        3dttest++ is used to perform ttest. With Clustsim option, clustsim table will be generated and integrated
+        into the result file.
+        """
         # Series of user defined interface commands to executed for the pipeline
         # -- start -- #
         self.interface.afni_TTest(output_filename=self.output_filename, clustsim=self.clustsim,
