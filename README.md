@@ -5,7 +5,8 @@
 
 ### Description
 - **UNCCH_CAMRI**: 
-  - legacy version of pipeline that dependent on ANTs, AFNI.
+  - legacy version of the pipeline
+  - dependency on ANTs, AFNI, and CAMRI_CORE plugin
   - core fMRI preprocessing pipeline
   - task-based fMRI analysis pipeline
   - 2nd level statistics using 3dMVM or 3dttest++ of AFNI
