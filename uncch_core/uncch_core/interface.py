@@ -1,5 +1,4 @@
 from pynipt import Processor, InterfaceBuilder
-from .funcs import modenorm_func, nuisance_filtering_func, standardization_func
 from shleeh.errors import *
 import sys
 
@@ -22,11 +21,44 @@ class Interface(Processor):
     #     pass
 
     # TODO: QC tools
-    # def camri_TSNR(self):
-    #     pass
-    #
-    # def camri_ReHo(self):
-    #     pass
+    def camri_TSNR(self, input_path, mask_path, regex=None, img_ext='nii.gz',
+                   step_idx=None, sub_code=None, suffix=None):
+        from .funcs import tsnr_func
+        itf = InterfaceBuilder(self)
+        itf.init_step(title='tSNR', mode='processing', type='python',
+                      idx=step_idx, subcode=sub_code, suffix=suffix)
+        if regex is not None:
+            filter_dict = dict(regex=regex, ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
+        itf.set_input(label='input', input_path=input_path,
+                      filter_dict=filter_dict, group_input=False)
+        itf.set_var(label='mask', value=mask_path)
+        itf.set_output(label='output')
+        itf.set_func(tsnr_func)
+        itf.set_output_checker(label='output')
+        itf.run()
+
+    def camri_ReHo(self, input_path, mask_path, nn_level=3,
+                   regex=None, img_ext='nii.gz',
+                   step_idx=None, sub_code=None, suffix=None):
+
+        from .funcs import reho_func
+        itf = InterfaceBuilder(self)
+        itf.init_step(title='ReHo', mode='processing', type='python',
+                      idx=step_idx, subcode=sub_code, suffix=suffix)
+        if regex is not None:
+            filter_dict = dict(regex=regex, ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
+        itf.set_input(label='input', input_path=input_path,
+                      filter_dict=filter_dict, group_input=False)
+        itf.set_var(label='mask', value=mask_path)
+        itf.set_var(label='nn_level', value=nn_level)
+        itf.set_output(label='output')
+        itf.set_func(reho_func)
+        itf.set_output_checker(label='output')
+        itf.run()
     #
     # def camri_ALFF(self):
     #     pass
@@ -34,7 +66,7 @@ class Interface(Processor):
     # def camri_DVARS(self):
     #     pass
 
-    def camri_Standardize(self, input_path, mask_path, img_ext='nii.gz',
+    def camri_Standardize(self, input_path, mask_path, regex=None, img_ext='nii.gz',
                           step_idx=None, sub_code=None, suffix=None):
         """ Standardize data
 
@@ -45,13 +77,19 @@ class Interface(Processor):
             sub_code(str):      sub stepcode, one character, 0 or A-Z
             suffix(str):        suffix to identify the current step
         """
+        from .funcs import standardize_func
         itf = InterfaceBuilder(self)
         itf.init_step(title='StandardizeSignal', mode='processing', type='python',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path)
+        if regex is not None:
+            filter_dict = dict(regex=regex, ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
+        itf.set_input(label='input', input_path=input_path,
+                      filter_dict=filter_dict, group_input=False)
         itf.set_var(label='mask', value=mask_path)
         itf.set_output(label='output')
-        itf.set_func(standardization_func)
+        itf.set_func(standardize_func)
         itf.set_output_checker(label='output')
         itf.run()
 
@@ -88,12 +126,9 @@ class Interface(Processor):
         itf.set_output_checker(label='mask')
         itf.run()
 
-    def nilearn_NuisanceRegression(self):
-        pass
-
     def camri_NuisanceRegression(self, input_path, dt, mask_path=None,
                                  regex=None, img_ext='nii.gz',
-                                 fwhm=None, bandcut=None,
+                                 fwhm=None, highpass=None, lowpass=None,
                                  ort=None, ort_regex=None, ort_ext=None,
                                  step_idx=None, sub_code=None, suffix=None):
         """
@@ -104,13 +139,15 @@ class Interface(Processor):
             regex:
             img_ext:
             fwhm:
-            bandcut:
+            highpass:
+            lowpass:
             ort:
             ort_regex:
             step_idx:
             sub_code:
             suffix:
         """
+        from .funcs import nuisance_regression_func
         itf = InterfaceBuilder(self)
         itf.init_step(title='NuisanceRegression', mode='processing', type='python',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
@@ -120,23 +157,23 @@ class Interface(Processor):
             filter_dict = dict(ext=img_ext)
         itf.set_input(label='input', input_path=input_path,
                       filter_dict=filter_dict, group_input=False)
-        if mask_path is not None:
-            itf.set_var(label='mask', value=mask_path)
-        if fwhm is not None:
-            itf.set_var(label='fwhm', value=fwhm)
-        if bandcut is not None:
-            itf.set_var(label='bandcut', value=bandcut)
-        if ort is not None:
-            if ort_regex is None:
+        itf.set_var(label='mask', value=mask_path)
+        itf.set_var(label='fwhm', value=fwhm)
+        itf.set_var(label='highpass', value=highpass)
+        itf.set_var(label='lowpass', value=lowpass)
+        itf.set_var(label='dt', value=dt)
+        itf.set_var(label='bp_order', value=5)
+        if ort:
+            if not ort_regex:
                 raise InvalidApproach('Regex pattern must provided for ort option.')
-            if ort_ext is None:
+            if not ort_ext:
                 raise InvalidApproach('Extension hint of ort must be provided.')
             itf.set_input(label='ort', input_path=ort,
                           filter_dict=dict(regex=ort_regex, ext=ort_ext))
-        itf.set_var(label='dt', value=dt)
-        itf.set_var(label='bp_order', value=5)
+        else:
+            itf.set_var(label='ort', value=ort)
         itf.set_var(label='pn_order', value=3)
-        itf.set_func(nuisance_filtering_func)
+        itf.set_func(nuisance_regression_func)
         itf.set_output(label='output')
         itf.set_output_checker(label='output')
         itf.run()
@@ -155,6 +192,7 @@ class Interface(Processor):
             sub_code(str):      sub stepcode, one character, 0 or A-Z
             suffix(str):        suffix to identify the current step
         """
+        from .funcs import modenorm_func
         itf = InterfaceBuilder(self)
         itf.init_step(title='ModeNormalization', mode='processing', type='python',
                       idx=step_idx, subcode=sub_code, suffix=suffix)

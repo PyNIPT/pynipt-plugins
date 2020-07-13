@@ -5,14 +5,30 @@ class UNCCH_CAMRI(PipelineBuilder):
     def __init__(self, interface,
                  # User defined arguments
                  # -- start -- #
-                 template_path=None, anat='anat', func='func', aniso=False,
-                 cbv_regex=None, cbv_scantime=None,
+
+                 # CorePreprocessing:
+                 anat='anat', func='func',
                  tr=2, tpattern='altplus',
-                 regex=None,
-                 fwhm=0.5, mask_path=None,
+                 template_path=None, aniso=False,
+
+                 # CBV-fMRI specific parameters
+                 cbv_regex=None, cbv_scantime=None,
+
+                 # GLM analysis
                  hrf_model=None, hrf_parameters=None, stim_onsets=None,
                  step_idx=None, step_tag=None,
-                 output_filename=None, groupa=None, groupb=None, groupa_regex=None, groupb_regex=None, clustsim=None
+
+                 # RSFC
+                 regex=None,
+                 fwhm=0.5, mask_path=None,
+                 nn=3,
+                 highpass=0.01, lowpass=0.1,
+
+                 # T-test
+                 output_filename=None, groupa=None, groupb=None, groupa_regex=None, groupb_regex=None, clustsim=None,
+
+                 # MVM
+
                  # --  end  -- #
                  ):
         """
@@ -42,13 +58,15 @@ class UNCCH_CAMRI(PipelineBuilder):
                                 file's regex pattern of MION infusion data, it will creates average image using
                                 first 20 frames and last 20 frames to generate BOLD and CBV average images.
             cbv_scantime(int):  total scantime for MION infusion image in second.
+
             - 02_CorePreprocessing
             template_path(str): absolute path of brain template image (default=None)
             aniso(bool):        True if voxel is anisotropic (default=False)
                                 This option is for the image has truncated brain with thicker slice thickness
                                 and it uses afni's linear registration for normalization instead ants's non-linear
                                 registration tool, SyN.
-            - 03_TaskBased_1stLevelAnalysis
+
+            - 03_GeneralLinearModeling
             regex(str):             Regular express pattern of filename to select dataset
             mask_path(str):         path of brain mask image
             fwhm(int or float):     full width half maximum value for smoothing
@@ -57,7 +75,14 @@ class UNCCH_CAMRI(PipelineBuilder):
             stim_onset(list):       stimulation onset times
             step_idx(idx):          step_index to classify the step with other when apply multiple
             step_tag(str):          suffix tag to classify the step with other when apply multiple
-            - 04_TaskBased_2ndLevelAnalysis
+
+            - 04_RSFC
+            step_idx(idx):          step_index to classify the step with other when apply multiple
+            step_tag(str):          suffix tag to classify the step with other when apply multiple
+            highpass(float):
+            lowpass(float):
+
+            - 05_TTest
             output_filename(str):   output filename of 2nd level analysis
             groupa(str):            datatype or stepcode of input data of group A
             groupb(str):            datatype or stepcode of input data of group B
@@ -66,6 +91,8 @@ class UNCCH_CAMRI(PipelineBuilder):
             clustsim(bool):         use Clustsim option if True
             step_idx(idx):          step_index to classify the step with other when apply multiple
             step_tag(str):          suffix tag to classify the step with other when apply multiple
+
+            - 06_MVM
         """
         super(UNCCH_CAMRI, self).__init__(interface)
         # User defined attributes for storing arguments
@@ -82,7 +109,7 @@ class UNCCH_CAMRI(PipelineBuilder):
         self.template_path = template_path
         self.aniso = aniso
 
-        # 03_TaskBased_1stLevelAnalysis
+        # 03_GeneralLinearModeling
         self.regex = regex
         self.mask_path = mask_path
         self.fwhm = fwhm
@@ -92,13 +119,24 @@ class UNCCH_CAMRI(PipelineBuilder):
         self.step_idx = step_idx
         self.step_tag = step_tag
 
-        # 04_TaskBased_2ndLevelAnalysis
+        # 04_RSFC_SignalCleaning
+        # self.fwhm = fwhm
+        # self.tr = tr
+        # self.regex = regex
+        self.highpass = highpass
+        self.lowpass = lowpass
+        self.nn = nn
+
+        # 05_TTest
         self.output_filename = output_filename
         self.groupa = groupa
         self.groupa_regex = groupa_regex
         self.groupb = groupb
         self.groupb_regex = groupb_regex
         self.clustsim = clustsim
+
+        # 06_MVM
+
         # --  end  -- #
 
     def pipe_01_MaskPreparation(self):
@@ -218,7 +256,7 @@ class UNCCH_CAMRI(PipelineBuilder):
                                                  suffix=self.func)
         # --  end  -- #
 
-    def pipe_03_TaskBased_1stLevelAnalysis(self):
+    def pipe_03_GeneralLinearModeling(self):
         """
         The normalized data will be scaled to have mean value of 100 for each voxel followed by the spacial smoothing
         at given FWHM. Finally, GLM will be performed to get subject level task activity map
@@ -242,7 +280,37 @@ class UNCCH_CAMRI(PipelineBuilder):
         self.step_tag = None
         # --  end  -- #
 
-    def pipe_04_TaskBased_2ndLevelAnalysis(self):
+    def pipe_04_RSFC(self):
+        """
+        The nuisance regression will be performed, then the data will be standardize for further analysis.
+        """
+        self.interface.camri_NuisanceRegression(input_path='040', dt=self.tr, mask_path=self.mask_path,
+                                                regex=self.regex,
+                                                fwhm=self.fwhm, highpass=self.highpass, lowpass=self.lowpass,
+                                                ort='020', ort_regex='.*', ort_ext='1D',
+                                                step_idx=self.step_idx, sub_code='A', suffix=self.step_tag)
+
+        input_path = f'{str(self.step_idx).zfill(2)}A'
+        self.interface.camri_ModeNormalization(input_path=input_path, mask_path=self.mask_path,
+                                               regex=self.regex, mode=1000,
+                                               step_idx=self.step_idx, sub_code='B', suffix=self.step_tag)
+        self.interface.camri_Standardize(input_path=input_path, mask_path=self.mask_path, regex=self.regex,
+                                         step_idx=self.step_idx, sub_code='C', suffix=self.step_tag)
+
+        input_path = f'{str(self.step_idx).zfill(2)}B'
+        self.interface.camri_TSNR(input_path=input_path, mask_path=self.mask_path, regex=self.regex,
+                                  step_idx=self.step_idx, sub_code='D', suffix=self.step_tag)
+        self.interface.camri_ALFF(input_path=input_path, mask_path=self.mask_path, regex=self.regex,
+                                  highhass=self.highpass, lowpass=self.lowpass, dt=self.tr,
+                                  step_idx=self.step_idx, sub_code='E', suffix=self.step_tag)
+
+        input_path = f'{str(self.step_idx).zfill(2)}C'
+        self.interface.camri_ReHo(input_path=input_path, mask_path=self.mask_path, nn_level=self.nn, regex=self.regex,
+                                  step_idx=self.step_idx, sub_code='F', suffix=self.step_tag)
+        self.step_idx = None
+        self.step_tag = None
+
+    def pipe_05_2ndLevel_TTest(self):
         """
         3dttest++ is used to perform ttest. With Clustsim option, clustsim table will be generated and integrated
         into the result file.
@@ -258,3 +326,14 @@ class UNCCH_CAMRI(PipelineBuilder):
         self.step_idx = None
         self.step_tag = None
         # --  end  -- #
+
+    # def pipe_06_MVM(self):
+    #     """
+    #     """
+    #     # Series of user defined interface commands to executed for the pipeline
+    #     # -- start -- #
+    #
+    #     # reset step_tag
+    #     self.step_idx = None
+    #     self.step_tag = None
+    #     # --  end  -- #

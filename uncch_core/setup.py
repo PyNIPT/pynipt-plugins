@@ -9,11 +9,11 @@ PyNIPT plugin - UNCCH
 from distutils.core import setup
 from setuptools import find_packages
 
-__version__ = '0.0.1b0'
+__version__ = '0.0.1'
 __author__ = 'SungHo Lee'
-__email__ = 'shlee:@unc.edu'
-__url__ = 'https://github.com/dvm-shlee/camri_core'
-__package_name__ = 'camri_core'
+__email__ = 'shlee@unc.edu'
+__url__ = 'https://github.com/dvm-shlee/pynipt-plugin'
+__package_name__ = 'uncch_core'
 
 setup(name=f'pynipt-plugin-{__package_name__}',
       version=__version__,
@@ -24,9 +24,12 @@ setup(name=f'pynipt-plugin-{__package_name__}',
       url=__url__,
       license='GNLv3',
       packages=find_packages(),
-      install_requires=['pynipt>=0.1.1b0',
+      install_requires=['pynipt>=0.2.2',
                         'nibabel',
-                        'simpleITK'],
+                        'simpleITK',
+                        'rbm>=0.0.2a0',
+                        'shleeh>=0.0.7',
+                        'slfmri>=0.0.5'],
       classifiers=[
           'Development Status :: 4 - Beta',
           'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
@@ -37,5 +40,5 @@ setup(name=f'pynipt-plugin-{__package_name__}',
           'Programming Language :: Python :: 3.7',
           'Topic :: Software Development',
       ],
-      keywords='pynipt, plugin, pipeline, camri_core, windows10, windows'
+      keywords='pynipt, plugin, pipeline, uncch_core, windows10, windows'
      )
