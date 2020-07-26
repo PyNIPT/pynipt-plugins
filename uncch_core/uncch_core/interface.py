@@ -20,8 +20,8 @@ class Interface(Processor):
     # def camri_ApplySpatialNorm(self):
     #     pass
 
-    # TODO: QC tools
-    def camri_TSNR(self, input_path, mask_path, regex=None, img_ext='nii.gz',
+    def camri_TSNR(self, input_path, mask_path,
+                   regex=None, img_ext='nii.gz', file_idx=None,
                    step_idx=None, sub_code=None, suffix=None):
         from .funcs import tsnr_func
         itf = InterfaceBuilder(self)
@@ -31,7 +31,7 @@ class Interface(Processor):
             filter_dict = dict(regex=regex, ext=img_ext)
         else:
             filter_dict = dict(ext=img_ext)
-        itf.set_input(label='input', input_path=input_path,
+        itf.set_input(label='input', input_path=input_path, idx=file_idx,
                       filter_dict=filter_dict, group_input=False)
         itf.set_var(label='mask', value=mask_path)
         itf.set_output(label='output')
@@ -40,9 +40,24 @@ class Interface(Processor):
         itf.run()
 
     def camri_ReHo(self, input_path, mask_path, nn_level=3,
-                   regex=None, img_ext='nii.gz',
+                   file_idx=None, regex=None, img_ext='nii.gz',
                    step_idx=None, sub_code=None, suffix=None):
+        """
+        Args:
+            input_path:
+            mask_path:
+            nn_level:
+            file_idx(int):      index of file if the process need to be executed on a specific file
+                                in session folder.
+            regex(str):         regular express pattern to filter dataset
+            img_ext(str):       file extension (default='nii.gz')
+            step_idx:
+            sub_code:
+            suffix:
 
+        Returns:
+
+        """
         from .funcs import reho_func
         itf = InterfaceBuilder(self)
         itf.init_step(title='ReHo', mode='processing', type='python',
@@ -51,7 +66,7 @@ class Interface(Processor):
             filter_dict = dict(regex=regex, ext=img_ext)
         else:
             filter_dict = dict(ext=img_ext)
-        itf.set_input(label='input', input_path=input_path,
+        itf.set_input(label='input', input_path=input_path, idx=file_idx,
                       filter_dict=filter_dict, group_input=False)
         itf.set_var(label='mask', value=mask_path)
         itf.set_var(label='nn_level', value=nn_level)
@@ -59,19 +74,129 @@ class Interface(Processor):
         itf.set_func(reho_func)
         itf.set_output_checker(label='output')
         itf.run()
-    #
-    # def camri_ALFF(self):
-    #     pass
-    #
-    # def camri_DVARS(self):
-    #     pass
 
-    def camri_Standardize(self, input_path, mask_path, regex=None, img_ext='nii.gz',
+    def camri_ALFF(self, input_path, mask_path,
+                   dt=None, highpass=0.01, lowpass=0.1,
+                   file_idx=None, regex=None, img_ext='nii.gz',
+                   step_idx=None, sub_code=None, suffix=None):
+        """
+
+        Args:
+            input_path:
+            mask_path:
+            dt:
+            highpass:
+            lowpass:
+            file_idx(int):      index of file if the process need to be executed on a specific file
+                                in session folder.
+            regex(str):         regular express pattern to filter dataset
+            img_ext(str):       file extension (default='nii.gz')
+            step_idx:
+            sub_code:
+            suffix:
+
+        Returns:
+
+        """
+        from .funcs import alff_func
+        itf = InterfaceBuilder(self)
+        itf.init_step(title='ALFF', mode='processing', type='python',
+                      idx=step_idx, subcode=sub_code, suffix=suffix)
+        if regex is not None:
+            filter_dict = dict(regex=regex, ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
+        itf.set_input(label='input', input_path=input_path, idx=file_idx,
+                      filter_dict=filter_dict, group_input=False)
+        itf.set_var(label='mask', value=mask_path)
+        itf.set_var(label='dt', value=dt)
+        itf.set_var(label='highpass', value=highpass)
+        itf.set_var(label='lowpass', value=lowpass)
+        itf.set_output(label='output')
+        itf.set_func(alff_func)
+        itf.set_output_checker(label='output')
+        itf.run()
+
+    def camri_DVARS(self, input_path, mask_path,
+                   file_idx=None, regex=None, img_ext='nii.gz',
+                   step_idx=None, sub_code=None, suffix=None):
+        """
+
+        Args:
+            input_path:
+            mask_path:
+            file_idx(int):      index of file if the process need to be executed on a specific file
+                                in session folder.
+            regex(str):         regular express pattern to filter dataset
+            img_ext(str):       file extension (default='nii.gz')
+            step_idx:
+            sub_code:
+            suffix:
+
+        Returns:
+
+        """
+        from .funcs import dvars_func
+        itf = InterfaceBuilder(self)
+        itf.init_step(title='DVARS', mode='processing', type='python',
+                      idx=step_idx, subcode=sub_code, suffix=suffix)
+        if regex is not None:
+            filter_dict = dict(regex=regex, ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
+        itf.set_input(label='input', input_path=input_path, idx=file_idx,
+                      filter_dict=filter_dict, group_input=False)
+        itf.set_var(label='mask', value=mask_path)
+        itf.set_output(label='output', ext='tsv')
+        itf.set_func(dvars_func)
+        itf.set_output_checker(label='output')
+        itf.run()
+
+    def camri_FramewiseDisplacement(self, input_path, mean_radius=None,
+                                    file_idx=None, regex=None, img_ext='1D',
+                                    step_idx=None, sub_code=None, suffix=None):
+        """
+
+        Args:
+            input_path:
+            mean_radius:
+            file_idx(int):      index of file if the process need to be executed on a specific file
+                                in session folder.
+            regex(str):         regular express pattern to filter dataset
+            img_ext(str):       file extension (default='1D')
+            step_idx:
+            sub_code:
+            suffix:
+
+        Returns:
+
+        """
+        from .funcs import fd_func
+        itf = InterfaceBuilder(self)
+        itf.init_step(title='FramewiseDisplacement', mode='processing', type='python',
+                      idx=step_idx, subcode=sub_code, suffix=suffix)
+        if regex is not None:
+            filter_dict = dict(regex=regex, ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
+        itf.set_input(label='input', input_path=input_path, idx=file_idx,
+                      filter_dict=filter_dict, group_input=False)
+        itf.set_var(label='mean_radius', value=mean_radius)
+        itf.set_output(label='output', ext='tsv')
+        itf.set_func(fd_func)
+        itf.set_output_checker(label='output')
+        itf.run()
+
+    def camri_Standardize(self, input_path, mask_path,
+                          regex=None, img_ext='nii.gz', file_idx=None,
                           step_idx=None, sub_code=None, suffix=None):
         """ Standardize data
 
         Args:
             input_path(str):    datatype or stepcode of input data
+            file_idx(int):      index of file if the process need to be executed on a specific file
+                                in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -85,7 +210,7 @@ class Interface(Processor):
             filter_dict = dict(regex=regex, ext=img_ext)
         else:
             filter_dict = dict(ext=img_ext)
-        itf.set_input(label='input', input_path=input_path,
+        itf.set_input(label='input', input_path=input_path, idx=file_idx,
                       filter_dict=filter_dict, group_input=False)
         itf.set_var(label='mask', value=mask_path)
         itf.set_output(label='output')
@@ -101,7 +226,7 @@ class Interface(Processor):
             input_path(str):    datatype or stepcode of input data
             file_idx(int):      index of file if the process need to be executed on a specific file
                                 in session folder.
-            regex:
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -127,7 +252,7 @@ class Interface(Processor):
         itf.run()
 
     def camri_NuisanceRegression(self, input_path, dt, mask_path=None,
-                                 regex=None, img_ext='nii.gz',
+                                 file_idx=None, regex=None, img_ext='nii.gz',
                                  fwhm=None, highpass=None, lowpass=None,
                                  ort=None, ort_regex=None, ort_ext=None,
                                  step_idx=None, sub_code=None, suffix=None):
@@ -136,8 +261,10 @@ class Interface(Processor):
             input_path:
             dt: sample time in second
             mask_path: mask path
-            regex:
-            img_ext:
+            file_idx(int):      index of file if the process need to be executed on a specific file
+                                in session folder.
+            regex(str):         regular express pattern to filter dataset
+            img_ext(str):       file extension (default='nii.gz')
             fwhm:
             highpass:
             lowpass:
@@ -155,7 +282,7 @@ class Interface(Processor):
             filter_dict = dict(regex=regex, ext=img_ext)
         else:
             filter_dict = dict(ext=img_ext)
-        itf.set_input(label='input', input_path=input_path,
+        itf.set_input(label='input', input_path=input_path, idx=file_idx,
                       filter_dict=filter_dict, group_input=False)
         itf.set_var(label='mask', value=mask_path)
         itf.set_var(label='fwhm', value=fwhm)
@@ -179,15 +306,17 @@ class Interface(Processor):
         itf.run()
 
     def camri_ModeNormalization(self, input_path, mask_path=None, mode=1000,
-                                regex=None, img_ext='nii.gz',
+                                file_idx=None, regex=None, img_ext='nii.gz',
                                 step_idx=None, sub_code=None, suffix=None):
         """
         Args:
             input_path(str):    datatype or stepcode of input data
             mask_path(str):      mask
-            regex:
-            mode:               mode
+            file_idx(int):      index of file if the process need to be executed on a specific file
+                                in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
+            mode:               mode
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
             suffix(str):        suffix to identify the current step
@@ -200,11 +329,45 @@ class Interface(Processor):
             filter_dict = dict(regex=regex, ext=img_ext)
         else:
             filter_dict = dict(ext=img_ext)
-        itf.set_input(label='input', input_path=input_path,
+        itf.set_input(label='input', input_path=input_path, idx=file_idx,
                       filter_dict=filter_dict, group_input=False)
         itf.set_var(label='mask', value=mask_path)
         itf.set_var(label='mode', value=mode)
         itf.set_func(modenorm_func)
+        itf.set_output(label='output')
+        itf.set_output_checker(label='output')
+        itf.run()
+
+    def camri_Periodogram(self, input_path, mask_path=None, dt=None, nfft=None,
+                          file_idx=None, regex=None, img_ext='nii.gz',
+                          step_idx=None, sub_code=None, suffix=None):
+        """
+        Args:
+            input_path(str):    datatype or stepcode of input data
+            mask_path(str):      mask
+            file_idx(int):      index of file if the process need to be executed on a specific file
+                                in session folder.
+            regex(str):         regular express pattern to filter dataset
+            img_ext(str):       file extension (default='nii.gz')
+            mode:               mode
+            step_idx(int):      stepcode index (positive integer lower than 99)
+            sub_code(str):      sub stepcode, one character, 0 or A-Z
+            suffix(str):        suffix to identify the current step
+        """
+        from .funcs import periodogram_func
+        itf = InterfaceBuilder(self)
+        itf.init_step(title='Periodogram', mode='processing', type='python',
+                      idx=step_idx, subcode=sub_code, suffix=suffix)
+        if regex is not None:
+            filter_dict = dict(regex=regex, ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
+        itf.set_input(label='input', input_path=input_path, idx=file_idx,
+                      filter_dict=filter_dict, group_input=False)
+        itf.set_var(label='mask', value=mask_path)
+        itf.set_var(label='dt', value=dt)
+        itf.set_var(label='nfft', value=nfft)
+        itf.set_func(periodogram_func)
         itf.set_output(label='output')
         itf.set_output_checker(label='output')
         itf.run()

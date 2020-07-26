@@ -312,13 +312,15 @@ def nuisance_regression_func(input: str, output: str, mask: Optional[str] = None
             sitk_img, header = nib2sitk(filtered_nii)
             filtered_sitk_img = gaussian_smoothing(sitk_img, fwhm, io_handler=stdout)
             filtered_nii = sitk2nib(filtered_sitk_img, header)
+
+        stdout.write(f'  Output path : {output}\n')
+        filtered_nii.to_filename(output)
+        stdout.write('Done...\n')
     except:
         stderr.write('[ERROR] Failed.\n')
         import traceback
         traceback.print_exception(*sys.exc_info(), file=stderr)
         return 1
-    filtered_nii.to_filename(output)
-    stdout.write('Done...\n')
     return 0
 
 
@@ -380,7 +382,7 @@ def alff_func(input: str, output:str, mask: Optional[str] = None,
     Returns:
         0 if success else 1
     """
-    from slfmri.lib.timeseries import alff
+    from slfmri.lib.signal import alff
 
     if stdout is None:
         stdout = sys.stdout
@@ -389,13 +391,14 @@ def alff_func(input: str, output:str, mask: Optional[str] = None,
 
     stdout.write('[UNCCH_CAMRI] ALFF:\n')
     try:
+        stdout.write(f'  Input path  : {input}\n')
         input_nii = nib.load(input)
 
         if mask is None:
             mask_data = (np.asarray(input_nii.dataobj).mean(-1) != 0).astype(int)
         else:
-            mask_nii = nib.load(mask)
-            mask_data = np.asarray(mask_nii.dataobj)
+            stdout.write(f'  Mask_path   : {mask}\n')
+            mask_data = np.asarray(nib.load(mask).dataobj)
 
         if dt is None:  # if no dt, parse from header
             dt = input_nii.header['pixdim'][4]
@@ -416,7 +419,9 @@ def alff_func(input: str, output:str, mask: Optional[str] = None,
 
         output_data[np.nonzero(mask_data)] = (all_data - avr) / std
         output_nii = nib.Nifti1Image(output_data, affine=input_nii.affine, header=input_nii.header)
+        stdout.write(f'  Output path  : {output}\n')
         output_nii.to_filename(output)
+        stdout.write('Done...\n')
     except:
         import traceback
         stderr.write('[ERROR] Failed.\n')
@@ -426,9 +431,10 @@ def alff_func(input: str, output:str, mask: Optional[str] = None,
 
 
 def dvars_func(input: str, output: str, mask: Optional[str] = None,
-               freq_band: Union[list, tuple] = (0.01, 0.1),
                stdout: Optional[IO] = None, stderr: Optional[IO] = None):
     # --- import module here
+    from slfmri.lib.volume import dvars, bold_mean_std
+    import pandas as pd
 
     # --- io handler
     if stdout is None:
@@ -436,17 +442,67 @@ def dvars_func(input: str, output: str, mask: Optional[str] = None,
     if stderr is None:
         stderr = sys.stderr
 
+    stdout.write('[UNCCH_CAMRI] DVARS:\n')
     try:
         # --- put your main code here
+        stdout.write(f'  Input path  : {input}\n')
         input_nii = nib.load(input)
+        input_data = np.asarray(input_nii.dataobj)
 
         if mask is None:
-            mask_data = (np.asarray(input_nii.dataobj).mean(-1) != 0).astype(int)
+            mask_data = None
         else:
-            mask_nii = nib.load(mask)
-            mask_data = np.asarray(mask_nii.dataobj)
+            stdout.write(f'  Mask_path   : {mask}\n')
+            mask_data = nib.load(mask).dataobj
+
+        df = pd.DataFrame()
+        stdout.write('')
+        df['DVARs'] = dvars(input_data, mask_data)
+        mean, std = bold_mean_std(input_data, mask_data)
+        df['BOLD_Mean'] = mean
+        df['BOLD_STD'] = std
+        stdout.write(f'  Output path  : {output}\n')
+        df.to_csv(output, sep='\t', index=False)
+        stdout.write('Done...\n')
+        # -- until here
+    except:
+        # Error handler
+        stderr.write('[ERROR] Failed.\n')
+        import traceback
+        traceback.print_exception(*sys.exc_info(), file=stderr)
+        return 1
+    return 0
 
 
+def fd_func(input: str, output: str, mean_radius=None,
+            stdout: Optional[IO] = None, stderr: Optional[IO] = None):
+    # --- import module here
+    from slfmri.lib.signal.qc import framewise_displacements, convert_radian2distance
+    import pandas as pd
+
+    stdout.write('[UNCCH_CAMRI] Framewise Displacement:\n')
+    # --- io handler
+    if stdout is None:
+        stdout = sys.stdout
+    if stderr is None:
+        stderr = sys.stderr
+    try:
+        # --- put your main code here
+        stdout.write(f'  Input path  : {input}\n')
+        volreg = pd.read_csv(input, header=None, sep=r'\s+')
+        volreg.columns = ['Roll', 'Pitch', 'Yaw', 'dI-S', 'dR-L', 'dA-P']
+        if mean_radius is None:
+            # default for rat
+            mean_radius = np.round(np.sqrt(2) * 9)
+            stdout.write('  No input provided on mean_radius, using default value for Rats\n')
+            stdout.write('  For the other cases, input the appropriate value.\n')
+        stdout.write(f'  MeanRadius   : {mean_radius}\n')
+
+        volreg = convert_radian2distance(volreg, mean_radius)
+        fd_metrics = framewise_displacements(volreg)
+        stdout.write(f'  Output path  : {output}\n')
+        fd_metrics.to_csv(output, sep='\t', index=False)
+        stdout.write('Done...\n')
         # -- until here
     except:
         # Error handler

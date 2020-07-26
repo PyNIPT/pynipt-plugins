@@ -282,31 +282,43 @@ class UNCCH_CAMRI(PipelineBuilder):
 
     def pipe_04_RSFC(self):
         """
-        The nuisance regression will be performed, then the data will be standardize for further analysis.
+        First step, QC - DVARS before signal filtering (HP only), TSNR, and FD
+        Second step, Filtering and QC - DVARS after signal filtering, TSNR, and FD
+        ALFF, ReHo, seed-based Connectivity, and pair-wise ROI-based connectivity
         """
-        self.interface.camri_NuisanceRegression(input_path='040', dt=self.tr, mask_path=self.mask_path,
-                                                regex=self.regex,
-                                                fwhm=self.fwhm, highpass=self.highpass, lowpass=self.lowpass,
-                                                ort='020', ort_regex='.*', ort_ext='1D',
-                                                step_idx=self.step_idx, sub_code='A', suffix=self.step_tag)
+        # hp_suffix = f'{self.step_tag}_HP'
+        # bp_suffix = f'{self.step_tag}_HP'
 
-        input_path = f'{str(self.step_idx).zfill(2)}A'
-        self.interface.camri_ModeNormalization(input_path=input_path, mask_path=self.mask_path,
-                                               regex=self.regex, mode=1000,
-                                               step_idx=self.step_idx, sub_code='B', suffix=self.step_tag)
-        self.interface.camri_Standardize(input_path=input_path, mask_path=self.mask_path, regex=self.regex,
-                                         step_idx=self.step_idx, sub_code='C', suffix=self.step_tag)
+        # self.interface.camri_DVARS(input_path='XXX, mask_path=self.mask_path,
+        #                    file_idx=None, regex=None, img_ext='nii.gz',
+        #                    step_idx=None, sub_code=None, suffix=None))
+        # self.interface.camri_FramewiseDisplacement(input_path='XXX', mean_radius=None,
+        #                                            file_idx=None, regex=None, img_ext='1D',
+        #                                            step_idx=None, sub_code=None, suffix=None)
+        # self.interface.camri_NuisanceRegression(input_path='040', dt=self.tr, mask_path=self.mask_path,
+        #                                         regex=self.regex,
+        #                                         fwhm=self.fwhm, highpass=self.highpass, lowpass=self.lowpass,
+        #                                         ort='020', ort_regex='.*', ort_ext='1D',
+        #                                         step_idx=self.step_idx, sub_code='B', suffix=bp_suffix)
 
-        input_path = f'{str(self.step_idx).zfill(2)}B'
-        self.interface.camri_TSNR(input_path=input_path, mask_path=self.mask_path, regex=self.regex,
-                                  step_idx=self.step_idx, sub_code='D', suffix=self.step_tag)
-        self.interface.camri_ALFF(input_path=input_path, mask_path=self.mask_path, regex=self.regex,
-                                  highhass=self.highpass, lowpass=self.lowpass, dt=self.tr,
-                                  step_idx=self.step_idx, sub_code='E', suffix=self.step_tag)
-
-        input_path = f'{str(self.step_idx).zfill(2)}C'
-        self.interface.camri_ReHo(input_path=input_path, mask_path=self.mask_path, nn_level=self.nn, regex=self.regex,
-                                  step_idx=self.step_idx, sub_code='F', suffix=self.step_tag)
+        # input_path = f'{str(self.step_idx).zfill(2)}A'
+        # self.interface.camri_ModeNormalization(input_path=input_path, mask_path=self.mask_path,
+        #                                        regex=self.regex, mode=1000,
+        #                                        step_idx=self.step_idx, sub_code='C', suffix=hp_suffix)
+        # self.interface.camri_Standardize(input_path=input_path, mask_path=self.mask_path, regex=self.regex,
+        #                                  step_idx=self.step_idx, sub_code='E', suffix=bp_suffix)
+        #
+        # input_path = f'{str(self.step_idx).zfill(2)}C'
+        # self.interface.camri_TSNR(input_path=input_path, mask_path=self.mask_path, regex=self.regex,
+        #                           step_idx=self.step_idx, sub_code='F', suffix=self.step_tag)
+        # self.interface.camri_Periodogram()
+        # self.interface.camri_ALFF(input_path=input_path, mask_path=self.mask_path, regex=self.regex,
+        #                           highhass=self.highpass, lowpass=self.lowpass, dt=self.tr,
+        #                           step_idx=self.step_idx, sub_code='G', suffix=self.step_tag)
+        #
+        # input_path = f'{str(self.step_idx).zfill(2)}D'
+        # self.interface.camri_ReHo(input_path=input_path, mask_path=self.mask_path, nn_level=self.nn, regex=self.regex,
+        #                           step_idx=self.step_idx, sub_code='F', suffix=self.step_tag)
         self.step_idx = None
         self.step_tag = None
 

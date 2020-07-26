@@ -17,7 +17,7 @@ __package_name__ = 'uncch_core'
 
 setup(name=f'pynipt-plugin-{__package_name__}',
       version=__version__,
-      description='UNCCH fMRI pipeline',
+      description='UNCCH core module for rsfMRI analysis - pynipt plugin',
       python_requires='>3.5, <3.8',
       author=__author__,
       author_email=__email__,
@@ -29,7 +29,7 @@ setup(name=f'pynipt-plugin-{__package_name__}',
                         'simpleITK',
                         'rbm>=0.0.2a0',
                         'shleeh>=0.0.7',
-                        'slfmri>=0.0.5'],
+                        'slfmri>=0.0.6'],
       classifiers=[
           'Development Status :: 4 - Beta',
           'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',

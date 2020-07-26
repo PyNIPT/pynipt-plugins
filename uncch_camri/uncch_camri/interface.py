@@ -8,8 +8,8 @@ class Interface(Processor):
     def __init__(self, *args, **kwargs):
         super(Interface, self).__init__(*args, **kwargs)
 
-    def afni_MeanImageCalc(self, input_path, regex=None,
-                           range=None, file_idx=0, img_ext='nii.gz',
+    def afni_MeanImageCalc(self, input_path, range=None,
+                           file_idx=0, regex=None, img_ext='nii.gz',
                            step_idx=None, sub_code=None, suffix=None):
         """Calculate mean intensity image using 3dTstat
         Args:
@@ -17,6 +17,7 @@ class Interface(Processor):
             range(list):        range for averaging (default=None)
             file_idx(int):      index of file if the process need to be executed on a specific file
                                 in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -29,8 +30,7 @@ class Interface(Processor):
             filter_dict = dict(regex=regex, ext=img_ext)
         else:
             filter_dict = dict(ext=img_ext)
-        itf.set_input(label='input', input_path=input_path, group_input=False,
-                      idx=file_idx,
+        itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
                       filter_dict=filter_dict)
         itf.set_output(label='output')
         cmd = ["3dTstat -prefix *[output] -mean"]
@@ -53,7 +53,8 @@ class Interface(Processor):
         itf.run()
 
     def afni_SliceTimingCorrection(self, input_path,
-                                   tr=None, tpattern=None, img_ext='nii.gz',
+                                   tr=None, tpattern=None,
+                                   file_idx=None, regex=None, img_ext='nii.gz',
                                    step_idx=None, sub_code=None, suffix=None):
         """Correct slice timing using afni's 3dTshift command
         Args:
@@ -61,6 +62,9 @@ class Interface(Processor):
             tr(int or float):   sampling rate
             tpattern(str):      slice timing pattern available in 3dTshift
                                 (e.g. altplus, altminus, seqplut, seqminus)
+            file_idx(int):      index of file if the process need to be executed on a specific file
+                                in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -69,8 +73,12 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='SliceTimingCorrection',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path, group_input=False,
-                      filter_dict=dict(ext=img_ext))
+        if regex is not None:
+            filter_dict = dict(ext=img_ext, regex=regex)
+        else:
+            filter_dict = dict(ext=img_ext)
+        itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
+                      filter_dict=filter_dict)
         itf.set_output(label='output')
         cmd = ['3dTshift -prefix *[output]']
         if tr is not None:
@@ -85,9 +93,9 @@ class Interface(Processor):
         itf.set_output_checker()
         itf.run()
 
-    def afni_MotionCorrection(self, input_path, regex=None,
-                              base=0, fourier=True, verbose=True,
-                              mparam=True, file_idx=None, img_ext='nii.gz',
+    def afni_MotionCorrection(self, input_path,
+                              base=0, fourier=True, verbose=True, mparam=True,
+                              file_idx=None, regex=None, img_ext='nii.gz',
                               step_idx=None, sub_code=None, suffix=None):
         """Correct head motion using afni's 3dvolreg command
         Args:
@@ -95,6 +103,7 @@ class Interface(Processor):
             step_idx(int):      stepcode index (positive integer lower than 99)
             file_idx(int):      index of file if the process need to be executed on a specific file
                                 in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             base(int or str):   reference image
             fourier(bool):      Fourior option on for 3dvolreg
@@ -136,8 +145,8 @@ class Interface(Processor):
         itf.set_output_checker()
         itf.run()
 
-    def afni_SkullStripping(self, input_path, mask_path, regex=None,
-                            file_idx=None, img_ext='nii.gz',
+    def afni_SkullStripping(self, input_path, mask_path,
+                            file_idx=None, regex=None, img_ext='nii.gz',
                             step_idx=None, sub_code=None, suffix=None):
         """ stripping the skull using brain mask
         Args:
@@ -145,6 +154,7 @@ class Interface(Processor):
             mask_path(str):     stepcode of mask_path
             file_idx(int):      index of file if the process need to be executed on a specific file
                                 in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -169,13 +179,14 @@ class Interface(Processor):
         itf.run()
 
     def ants_N4BiasFieldCorrection(self, input_path,
-                                   file_idx=None, img_ext='nii.gz',
+                                   file_idx=None, regex=None, img_ext='nii.gz',
                                    step_idx=None, sub_code=None, suffix=None):
         """ correcting bias field using N4 algorithm of ants package
         Args:
             input_path(str):    datatype or stepcode of input data
             file_idx(int):      index of file if the process need to be executed on a specific file
                                 in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -184,15 +195,20 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='N4BiasFieldCorrection', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
+        if regex is not None:
+            filter_dict = dict(regex=regex,
+                               ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
         itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
-                      filter_dict=dict(ext=img_ext))
+                      filter_dict=filter_dict)
         itf.set_output(label='output')
         itf.set_cmd("N4BiasFieldCorrection -i *[input] -o *[output]")
         itf.set_output_checker()  # default label='output'
         itf.run()
 
     def afni_Coregistration(self, input_path, ref_path,
-                            file_idx=None, img_ext='nii.gz',
+                            file_idx=None, regex=None, img_ext='nii.gz',
                             step_idx=None, sub_code=None, suffix=None):
         """ realign the functional image into anatomical image using 3dAllineate command of
         afni package.
@@ -201,6 +217,7 @@ class Interface(Processor):
             ref_path(str):      stepcode of reference data
             file_idx(int):      index of file if the process need to be executed on a specific file
                                 in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -209,10 +226,15 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='Coregistration', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
+        if regex is not None:
+            filter_dict = dict(regex=regex,
+                               ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
         itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
                       filter_dict=dict(ext=img_ext))
         itf.set_static_input(label='ref', input_path=ref_path,
-                             idx=0, filter_dict=dict(ext=img_ext))
+                             idx=0, filter_dict=filter_dict)
         itf.set_output(label='output')
         itf.set_output(label='tfmat', ext='aff12.1D')
         itf.set_cmd("3dAllineate -prefix *[output] -onepass -EPI -base *[ref] -cmass+xy "
@@ -222,7 +244,7 @@ class Interface(Processor):
         itf.run()
 
     def afni_ApplyTransform(self, input_path, ref_path,
-                            file_idx=None, img_ext='nii.gz',
+                            file_idx=None, regex=None, img_ext='nii.gz',
                             step_idx=None, sub_code=None, suffix=None):
         """ apply the transform matrix that acquired from 3dAllineate command
         along all input data using 3dAllineate command of afni package.
@@ -231,6 +253,7 @@ class Interface(Processor):
             ref_path(str):      stepcode of reference data
             file_idx(int):      index of file if the process need to be executed on a specific file
                                 in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -239,8 +262,13 @@ class Interface(Processor):
         itf = InterfaceBuilder(self, n_threads=1)
         itf.init_step(title='ApplyTransform', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
+        if regex is not None:
+            filter_dict = dict(regex=regex,
+                               ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
         itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
-                      filter_dict=dict(ext=img_ext))
+                      filter_dict=filter_dict)
         itf.set_static_input(label='ref', input_path=ref_path,
                              idx=0, filter_dict=dict(ext=img_ext))
         itf.set_static_input(label='tfmat', input_path=ref_path,
@@ -252,7 +280,7 @@ class Interface(Processor):
         itf.run()
 
     def afni_SpatialNorm(self, input_path, ref_path,
-                         file_idx=None, img_ext='nii.gz',
+                         file_idx=None, regex=None, img_ext='nii.gz',
                          step_idx=None, sub_code=None, suffix=None):
         """ realign subject brain image into standard space using 3dAllineate command
         of afni package
@@ -261,6 +289,7 @@ class Interface(Processor):
             ref_path(str):      path for brain template image
             file_idx(int):      index of file if the process need to be executed on a specific file
                                 in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -269,8 +298,13 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='SpatialNorm', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
+        if regex is not None:
+            filter_dict = dict(regex=regex,
+                               ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
         itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
-                      filter_dict=dict(ext=img_ext))
+                      filter_dict=filter_dict)
         itf.set_var(label='ref', value=ref_path)
         itf.set_output(label='output')
         itf.set_output(label='tfmat', ext='aff12.1D')
@@ -282,7 +316,7 @@ class Interface(Processor):
         itf.run()
 
     def afni_ApplySpatialNorm(self, input_path, ref_path,
-                              file_idx=None, img_ext='nii.gz',
+                              file_idx=None, regex=None, img_ext='nii.gz',
                               step_idx=None, sub_code=None, suffix=None):
         """ apply transform matrix generated by 3dAllineate along other images
         using same command of afni package
@@ -291,6 +325,7 @@ class Interface(Processor):
             ref_path(str):      path for brain template image
             file_idx(int):      index of file if the process need to be executed on a specific file
                                 in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -299,8 +334,13 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='ApplySpatialNorm', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path, group_input=False,
-                      idx=file_idx, filter_dict=dict(ext=img_ext))
+        if regex is not None:
+            filter_dict = dict(regex=regex,
+                               ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
+        itf.set_input(label='input', input_path=input_path, group_input=False, idx=file_idx,
+                      filter_dict=filter_dict)
         itf.set_static_input(label='base', input_path=ref_path,
                              idx=0, filter_dict=dict(ext='nii.gz'))
         itf.set_static_input(label='tfmat', input_path=ref_path,
@@ -313,7 +353,7 @@ class Interface(Processor):
         itf.run()
 
     def ants_SpatialNorm(self, input_path, ref_path,
-                         file_idx=None, img_ext='nii.gz',
+                         img_ext='nii.gz', file_idx=None,
                          step_idx=None, sub_code=None, suffix=None):
         """ realign subject brain image into standard space using antsRegistrationSyN.sh command
         of ants package
@@ -349,6 +389,7 @@ class Interface(Processor):
             ref_path(str):      path for brain template image
             file_idx(int):      index of file if the process need to be executed on a specific file
                                 in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -372,7 +413,7 @@ class Interface(Processor):
         itf.run()
 
     def afni_BlurInMask(self, input_path, mask_path, fwhm,
-                        file_idx=None, img_ext='nii.gz',
+                        regex=None, img_ext='nii.gz', file_idx=None,
                         step_idx=None, sub_code=None, suffix=None):
         """ FWHM based spatial gaussian smoothing using 3dBlurInMask command of Afni
         Args:
@@ -381,6 +422,7 @@ class Interface(Processor):
             fwhm(float):        full width half maximum value
             file_idx(int):      index of file if the process need to be executed on a specific file
                                 in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -389,8 +431,13 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='BlurInMask', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
+        if regex is not None:
+            filter_dict = dict(regex=regex,
+                               ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
         itf.set_input(label='input', input_path=input_path, idx=file_idx,
-                      filter_dict=dict(ext=img_ext), group_input=False)
+                      filter_dict=filter_dict, group_input=False)
         itf.set_var(label='fwhm', value=str(fwhm))
         itf.set_var(label='mask', value=mask_path)
         itf.set_output(label='output')
@@ -399,7 +446,8 @@ class Interface(Processor):
         itf.set_output_checker(label='output')
         itf.run()
 
-    def afni_BlurToFWHM(self, input_path, fwhm, file_idx=None, img_ext='nii.gz',
+    def afni_BlurToFWHM(self, input_path, fwhm,
+                        regex=None, img_ext='nii.gz', file_idx=None,
                         step_idx=None, sub_code=None, suffix=None):
         """ FWHM based spatial gaussian smoothing using 3dmerge command of Afni
         Args:
@@ -407,6 +455,7 @@ class Interface(Processor):
             fwhm(float):        full width half maximum value
             file_idx(int):      index of file if the process need to be executed on a specific file
                                 in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -415,8 +464,14 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='BlurToFWHM', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
+
+        if regex is not None:
+            filter_dict = dict(regex=regex,
+                               ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
         itf.set_input(label='input', input_path=input_path, idx=file_idx,
-                      filter_dict=dict(ext=img_ext), group_input=False)
+                      filter_dict=filter_dict, group_input=False)
         itf.set_var(label='fwhm', value=str(fwhm))
         itf.set_output(label='output')
         itf.set_cmd("3dmerge -prefix *[output] -doall -1blur_fwhm *[fwhm] *[input]")
@@ -424,7 +479,7 @@ class Interface(Processor):
         itf.run()
 
     def afni_Scailing(self, input_path, mask_path, mean=100, max=200,
-                      img_ext='nii.gz',
+                      regex=None, img_ext='nii.gz', file_idx=None,
                       step_idx=None, sub_code=None, suffix=None):
         """ Scaling the time series dataset to have given mean in the mask
         If max value is inputted, the max value will be cut at given value.
@@ -433,6 +488,9 @@ class Interface(Processor):
             mask_path(str):     path for brain mask image
             mean(int, float):   desired mean value
             max(int, float):    desired max value
+            file_idx(int):      index of file if the process need to be executed on a specific file
+                                in session folder.
+            regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
             sub_code(str):      sub stepcode, one character, 0 or A-Z
@@ -441,8 +499,13 @@ class Interface(Processor):
         itf = InterfaceBuilder(self)
         itf.init_step(title='Scaling', mode='processing',
                       idx=step_idx, subcode=sub_code, suffix=suffix)
-        itf.set_input(label='input', input_path=input_path,
-                      filter_dict=dict(ext=img_ext), group_input=False)
+        if regex is not None:
+            filter_dict = dict(regex=regex,
+                               ext=img_ext)
+        else:
+            filter_dict = dict(ext=img_ext)
+        itf.set_input(label='input', input_path=input_path, idx=file_idx,
+                      filter_dict=filter_dict, group_input=False)
         itf.set_temporary(label='meanimg')
         itf.set_var(label='mask', value=mask_path)
         itf.set_var(label='mean', value=mean)
@@ -460,7 +523,7 @@ class Interface(Processor):
 
     def afni_Deconvolution(self, input_path, mask_path,
                            onset_time, model, parameters, polort=2,
-                           regex=None, img_ext='nii.gz',
+                           regex=None, img_ext='nii.gz', file_idx=None,
                            step_idx=None, sub_code=None, suffix=None):
         """ General Linear Model analysis using 3dDeconvolve of Afni package
         this interface is for use of single stimulation model only.
@@ -471,6 +534,8 @@ class Interface(Processor):
             onset_time(list):   stimulation onset time, list of int (e.g. [10, 50, 90])
             model(str):         response model
             parameters(list):   parameters for response model
+            file_idx(int):      index of file if the process need to be executed on a specific file
+                                in session folder.
             regex(str):         regular express pattern to filter dataset
             img_ext(str):       file extension (default='nii.gz')
             step_idx(int):      stepcode index (positive integer lower than 99)
@@ -486,7 +551,7 @@ class Interface(Processor):
         else:
             filter_dict = dict(ext=img_ext)
         # set input
-        itf.set_input(label='input', input_path=input_path,
+        itf.set_input(label='input', input_path=input_path, idx=file_idx,
                       filter_dict=filter_dict, group_input=False)
         # set variables
         itf.set_var(label='mask', value=mask_path)

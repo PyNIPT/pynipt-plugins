@@ -17,7 +17,7 @@ __package_name__ = 'uncch_camri'
 
 setup(name='pynipt-plugin-{}'.format(__package_name__),
       version=__version__,
-      description='UNCCH fMRI pipeline',
+      description='UNCCH standard pipeline packages for core service - pynipt plugin',
       python_requires='>3.5, <3.8',
       author=__author__,
       author_email=__email__,
