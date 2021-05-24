@@ -11,7 +11,7 @@ from setuptools import find_packages
 
 __version__ = '0.0.1'
 __author__ = 'SungHo Lee'
-__email__ = 'shlee:@unc.edu'
+__email__ = 'shlee@unc.edu'
 __url__ = 'https://github.com/dvm-shlee/pynipt-plugin'
 __package_name__ = 'uncch_camri'
 

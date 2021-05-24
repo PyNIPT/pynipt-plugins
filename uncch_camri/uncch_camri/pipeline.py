@@ -76,13 +76,7 @@ class UNCCH_CAMRI(PipelineBuilder):
             step_idx(idx):          step_index to classify the step with other when apply multiple
             step_tag(str):          suffix tag to classify the step with other when apply multiple
 
-            - 04_RSFC
-            step_idx(idx):          step_index to classify the step with other when apply multiple
-            step_tag(str):          suffix tag to classify the step with other when apply multiple
-            highpass(float):
-            lowpass(float):
-
-            - 05_TTest
+            - 04_TTest
             output_filename(str):   output filename of 2nd level analysis
             groupa(str):            datatype or stepcode of input data of group A
             groupb(str):            datatype or stepcode of input data of group B
@@ -91,8 +85,6 @@ class UNCCH_CAMRI(PipelineBuilder):
             clustsim(bool):         use Clustsim option if True
             step_idx(idx):          step_index to classify the step with other when apply multiple
             step_tag(str):          suffix tag to classify the step with other when apply multiple
-
-            - 06_MVM
         """
         super(UNCCH_CAMRI, self).__init__(interface)
         # User defined attributes for storing arguments
@@ -119,14 +111,6 @@ class UNCCH_CAMRI(PipelineBuilder):
         self.step_idx = step_idx
         self.step_tag = step_tag
 
-        # 04_RSFC_SignalCleaning
-        # self.fwhm = fwhm
-        # self.tr = tr
-        # self.regex = regex
-        self.highpass = highpass
-        self.lowpass = lowpass
-        self.nn = nn
-
         # 05_TTest
         self.output_filename = output_filename
         self.groupa = groupa
@@ -134,8 +118,6 @@ class UNCCH_CAMRI(PipelineBuilder):
         self.groupb = groupb
         self.groupb_regex = groupb_regex
         self.clustsim = clustsim
-
-        # 06_MVM
 
         # --  end  -- #
 
@@ -280,49 +262,8 @@ class UNCCH_CAMRI(PipelineBuilder):
         self.step_tag = None
         # --  end  -- #
 
-    def pipe_04_RSFC(self):
-        """
-        First step, QC - DVARS before signal filtering (HP only), TSNR, and FD
-        Second step, Filtering and QC - DVARS after signal filtering, TSNR, and FD
-        ALFF, ReHo, seed-based Connectivity, and pair-wise ROI-based connectivity
-        """
-        # hp_suffix = f'{self.step_tag}_HP'
-        # bp_suffix = f'{self.step_tag}_HP'
 
-        # self.interface.camri_DVARS(input_path='XXX, mask_path=self.mask_path,
-        #                    file_idx=None, regex=None, img_ext='nii.gz',
-        #                    step_idx=None, sub_code=None, suffix=None))
-        # self.interface.camri_FramewiseDisplacement(input_path='XXX', mean_radius=None,
-        #                                            file_idx=None, regex=None, img_ext='1D',
-        #                                            step_idx=None, sub_code=None, suffix=None)
-        # self.interface.camri_NuisanceRegression(input_path='040', dt=self.tr, mask_path=self.mask_path,
-        #                                         regex=self.regex,
-        #                                         fwhm=self.fwhm, highpass=self.highpass, lowpass=self.lowpass,
-        #                                         ort='020', ort_regex='.*', ort_ext='1D',
-        #                                         step_idx=self.step_idx, sub_code='B', suffix=bp_suffix)
-
-        # input_path = f'{str(self.step_idx).zfill(2)}A'
-        # self.interface.camri_ModeNormalization(input_path=input_path, mask_path=self.mask_path,
-        #                                        regex=self.regex, mode=1000,
-        #                                        step_idx=self.step_idx, sub_code='C', suffix=hp_suffix)
-        # self.interface.camri_Standardize(input_path=input_path, mask_path=self.mask_path, regex=self.regex,
-        #                                  step_idx=self.step_idx, sub_code='E', suffix=bp_suffix)
-        #
-        # input_path = f'{str(self.step_idx).zfill(2)}C'
-        # self.interface.camri_TSNR(input_path=input_path, mask_path=self.mask_path, regex=self.regex,
-        #                           step_idx=self.step_idx, sub_code='F', suffix=self.step_tag)
-        # self.interface.camri_Periodogram()
-        # self.interface.camri_ALFF(input_path=input_path, mask_path=self.mask_path, regex=self.regex,
-        #                           highhass=self.highpass, lowpass=self.lowpass, dt=self.tr,
-        #                           step_idx=self.step_idx, sub_code='G', suffix=self.step_tag)
-        #
-        # input_path = f'{str(self.step_idx).zfill(2)}D'
-        # self.interface.camri_ReHo(input_path=input_path, mask_path=self.mask_path, nn_level=self.nn, regex=self.regex,
-        #                           step_idx=self.step_idx, sub_code='F', suffix=self.step_tag)
-        self.step_idx = None
-        self.step_tag = None
-
-    def pipe_05_2ndLevel_TTest(self):
+    def pipe_04_2ndLevel_TTest(self):
         """
         3dttest++ is used to perform ttest. With Clustsim option, clustsim table will be generated and integrated
         into the result file.
@@ -338,14 +279,3 @@ class UNCCH_CAMRI(PipelineBuilder):
         self.step_idx = None
         self.step_tag = None
         # --  end  -- #
-
-    # def pipe_06_MVM(self):
-    #     """
-    #     """
-    #     # Series of user defined interface commands to executed for the pipeline
-    #     # -- start -- #
-    #
-    #     # reset step_tag
-    #     self.step_idx = None
-    #     self.step_tag = None
-    #     # --  end  -- #
